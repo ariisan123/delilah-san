@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const { signup } = require('../controllers/userController')
+const { signup } = require('../middlewares/signup')
 
 router.route('/')
-  .post(signup.bodyIsOk, signup.userExist, signup.sendUser)
+  .post(signup.bodyIsOk, signup.userEmailExist, signup.sendUser)
 
 module.exports = router;

@@ -12,9 +12,31 @@ const isAdmin = async (req, res, next) => {
       res.status(401).send('No autorizado')
     }
   } catch (err) {
-    console.log(err)
-    res.status(400).send('Error')
+    if (err.name == 'JsonWebTokenError') {
+      res.status(400).send('Error, token invalido')
+    } else {
+      res.status(500).json(err)
+    }
   }
 }
 
-module.exports = isAdmin
+const isLogged = (req, res, next) => {
+  try {
+    const { token } = req.headers;
+    const user = jwt.verify(token, process.env.SECRET);
+    if (user.user_id) {
+      next()
+    } else {
+      res.status(401).send("Token no encontrado, debes iniciar sesion")
+    }
+  } catch (err) {
+    if (err.name == 'JsonWebTokenError') {
+      res.status(400).send('Error, token invalido')
+    } else {
+      res.status(500).json(err)
+    }
+  }
+
+}
+
+module.exports = { isAdmin, isLogged }
