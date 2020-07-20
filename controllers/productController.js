@@ -63,6 +63,17 @@ const productControl = {
       }
     }
     return isOk
+  },
+  delete: async (productId) => {
+    try {
+      const product = await Product.destroy({
+        where: {
+          id: productId
+        }
+      })
+      return product
+    } catch (err) { return err }
+
   }
 
 }

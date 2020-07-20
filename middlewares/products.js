@@ -95,5 +95,33 @@ const put = {
   }
 }
 
+const delProduct = {
+  exist: async (req, res, next) => {
+    try {
+      const isOk = await productControl.getOne('id', req.params.id);
+      if (isOk) {
+        next()
+      } else {
+        res.status(404).send('Producto no encontrado')
+      }
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  },
+  destroy: async (req, res) => {
+    try {
+      const isOk = await productControl.delete(req.params.id);
+      console.log(isOk)
+      if (isOk == 1) {
+        res.status(202).send('Eliminado correctamente!')
+      } else {
+        res.status(401).send('Error al eliminar producto')
+      }
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+}
 
-module.exports = { post, get, put };
+
+module.exports = { post, get, put, delProduct };
