@@ -13,7 +13,7 @@ module.exports = (sequelize, type) => sequelize.define('Order', {
   },
   total_amount: {
     type: type.DOUBLE(20, 2),
-    allowNull: false
+    allowNull: true
   },
   payment: {
     type: type.BOOLEAN,

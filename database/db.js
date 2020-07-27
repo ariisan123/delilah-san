@@ -20,10 +20,11 @@ const Order = orderModel(sequelize, Sequelize);
 const Order_items = orderItemModel(sequelize, Sequelize);
 
 User.hasMany(Order, { as: 'orders', foreignKey: 'user_id' });
-Order.hasMany(Order_items, { as: 'user_order', foreignKey: 'order_id' });
-Product.hasMany(Order_items, { as: 'product_items', foreignKey: 'product_id' });
+Order.belongsToMany(Product, { through: Order_items, as: 'products' });
+Product.belongsToMany(Order, { through: Order_items, as: 'ProductOrder' });
 
-sequelize.sync()
+
+sequelize.sync({ force: false })
   .then(() => console.log('DB sincronizada correctamente'))
   .catch(err => console.log(err))
 

@@ -25,6 +25,7 @@ const isLogged = (req, res, next) => {
     const { token } = req.headers;
     const user = jwt.verify(token, process.env.SECRET);
     if (user.user_id) {
+      res.locals.user = user
       next()
     } else {
       res.status(401).send("Token no encontrado, debes iniciar sesion")
