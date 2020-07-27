@@ -1,20 +1,29 @@
 const { orderControl } = require('../controllers/orderController');
-const { response } = require('express');
 
-post = {
-  productsArray: (req, res, next) => {
-    const products = req.body.products;
+const post = {
+  hasProducts: (req, res, next) => {
+    const { products } = req.body;
     if (products.length > 0) {
       next()
     } else {
       res.status(400).send('Error, no se enviaron productos')
     }
   },
+  hasQuantity: (req, res, next) => {
+    const { products } = req.body;
+    for (let i = 0; i < products.length; i++) {
+      if (typeof (products[i].quantity) != 'number') {
+        return res.status(400).send('No se encontro la cantidad a comprar.')
+      }
+    }
+    next()
+  },
   productsExist: async (req, res, next) => {
+
     try {
 
       const { products } = req.body;
-      let finalProducts = await orderControl.verifyProducts(products);
+      const finalProducts = await orderControl.verifyProducts(products);
       console.log(finalProducts);
 
       if (finalProducts.length == products.length) {
@@ -26,7 +35,6 @@ post = {
       }
 
     } catch (err) {
-      console.log(err);
       res.status(500).json(err)
     }
 
@@ -48,16 +56,64 @@ post = {
   }
 }
 
-get = {
+const get = {
   all: async (req, res) => {
     try {
-      const orders = await orderControl.getAll(1);
-      console.log(orders);
-      res.status(200).json(orders)
+      const id = res.locals.user.user_id;
+      const orders = await orderControl.getAll(id);
+      if (orders.length == 0) {
+        res.status(200).send('No has realizado pedidos')
+      } else {
+        res.status(200).json(orders)
+      }
     } catch (err) {
       res.status(500).json(err)
     }
   }
 }
 
-module.exports = { post, get } 
+const put = {
+  verifyStatus: (req, res, next) => {
+    const { status } = req.body;
+
+    const statusValues = ['pending', 'processed', 'shipped', 'delivered'];
+    const exist = statusValues.find(a => a == status);
+    console.log(exist)
+
+    if (exist) {
+      next()
+    } else {
+      res.status(400).send('Valor inválido')
+    }
+
+  },
+  orderExist: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const exist = await orderControl.getOne(id);
+      if (exist) {
+        next()
+      } else {
+        res.status(404).send('No se escontró el pedido')
+      }
+
+    } catch (err) {
+      res.status(500).json(err)
+    }
+
+  },
+  update: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      console.log(status)
+      await orderControl.updateStatus(id, status)
+
+      res.status(200).send('Estado actualizado correctamente')
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+}
+
+module.exports = { post, get, put } 

@@ -1,10 +1,13 @@
 const router = require('express').Router();
 const { isLogged, isAdmin } = require('../middlewares/global');
-const { post, get } = require('../middlewares/orders');
+const { post, get, put } = require('../middlewares/orders');
 
 router.route('/')
-  .post(isLogged, post.productsArray, post.productsExist, post.newOrder)
-  .get(isAdmin, get.all)
+  .post(isLogged, post.hasProducts, post.hasQuantity, post.productsExist, post.newOrder)
+  .get(isLogged, get.all)
+
+router.route('/:id')
+  .put(isAdmin, put.verifyStatus, put.orderExist, put.update)
 
 
 module.exports = router;

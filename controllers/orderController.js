@@ -69,12 +69,36 @@ const orderControl = {
             through: {
               as: 'item',
               attributes: ['quantity']
-            },
-            required: true
+            }
           }
         ]
       })
       return order
+    } catch (err) { return err }
+  },
+  updateStatus: async (id, newStatus) => {
+    try {
+      await Order.update({ status: newStatus }, {
+        where: {
+          id: id
+        }
+      })
+    } catch (err) { return err }
+  },
+  getOne: async (id) => {
+    try {
+      const order = await Order.findOne({
+        where: {
+          id: id
+        }
+      })
+
+      if (order) {
+        return order
+      } else {
+        return false
+      }
+
     } catch (err) { return err }
   }
 }
