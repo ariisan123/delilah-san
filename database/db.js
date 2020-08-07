@@ -1,10 +1,10 @@
+require('../dotenv');
 const Sequelize = require('sequelize');
 const userModel = require('./models/User');
 const orderModel = require('./models/Order');
 const productModel = require('./models/Product');
 const orderItemModel = require('./models/Order_items');
 
-require('../dotenv');
 
 //Connection
 const sequelize = new Sequelize({
@@ -12,6 +12,7 @@ const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
   dialect: 'mysql'
 })
 
@@ -28,7 +29,7 @@ Order.belongsToMany(Product, { through: Order_items, as: 'products' });
 Product.belongsToMany(Order, { through: Order_items, as: 'ProductOrder' });
 
 //Synchronization
-sequelize.sync({ force: false })
+sequelize.sync({ force: true })
   .then(() => {
     console.log('DB sincronizada correctamente')
     Product.bulkCreate([

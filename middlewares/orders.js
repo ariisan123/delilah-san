@@ -24,8 +24,10 @@ const post = {
       const finalProducts = await orderControl.verifyProducts(products);
 
       if (finalProducts.length == products.length) {
-        const totalAmount = orderControl.getTotalAmount(finalProducts, products);
-        res.locals.totalAmount = totalAmount;
+        //const totalAmount = orderControl.getTotalAmount(finalProducts, products);
+        res.locals.finalProducts = finalProducts;
+        console.log("Productos", finalProducts)
+        //res.locals.totalAmount = totalAmount;
         next()
       } else {
         res.status(404).send('Producto no encontrado o sin stock')
@@ -37,13 +39,16 @@ const post = {
   },
   newOrder: async (req, res) => {
     let orderObject = req.body;
+    const { finalProducts } = res.locals;
     orderObject.user_id = res.locals.user.user_id;
-    orderObject.total_amount = res.locals.totalAmount;
+    orderObject.total_amount = orderControl.getTotalAmount(finalProducts);
+    orderObject.description = orderControl.newDescription(finalProducts);
+    console.log(finalProducts)
 
     try {
       const order = await orderControl.new(orderObject);
-      await orderControl.newItems(order, orderObject.products)
-      await orderControl.updateStock(orderObject.products)
+      await orderControl.newItems(order, finalProducts)
+      await orderControl.updateStock(finalProducts)
       res.status(201).send('Orden creada exitosamente!')
     } catch (err) {
       res.status(500).json(err)

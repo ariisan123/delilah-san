@@ -23,5 +23,6 @@ module.exports = (sequelize, type) => sequelize.define('Product', {
   tableName: 'products',
   underscored: true,
   createdAt: 'created_at',
-  updatedAt: 'updated_at'
+  updatedAt: 'updated_at',
+  paranoid: true
 });

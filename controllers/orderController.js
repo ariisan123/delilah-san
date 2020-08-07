@@ -1,4 +1,4 @@
-const { Order, Product } = require('../database/db');
+const { Order, Product, User, Order_items } = require('../database/db');
 const { Op } = require('sequelize');
 
 const orderControl = {
@@ -12,7 +12,11 @@ const orderControl = {
     try {
       await productsObject.forEach(async (element) => {
         try {
-          await orderInstance.addProducts(element.id, { through: { quantity: element.quantity } })
+          await orderInstance.addProducts(element.id, {
+            through: {
+              quantity: element.quantity
+            }
+          })
         } catch (err) { return err }
 
       });
@@ -29,7 +33,7 @@ const orderControl = {
             }
           }
         },
-        attributes: ['price']
+        attributes: ['price', 'name']
       })
       if (!product) {
         return false
@@ -44,7 +48,12 @@ const orderControl = {
       for (let i = 0; i < productsArr.length; i++) {
         const exist = await orderControl.getProduct(productsArr[i]);
         if (exist) {
-          finalProducts.push({ id: productsArr[i].id, price: exist.dataValues.price });
+          finalProducts.push({
+            id: productsArr[i].id,
+            price: exist.dataValues.price,
+            name: exist.dataValues.name,
+            quantity: productsArr[i].quantity
+          });
         } else {
           return finalProducts
         }
@@ -53,11 +62,11 @@ const orderControl = {
 
     } catch (err) { return err }
   },
-  getTotalAmount: (priceArr, productsArr) => {
+  getTotalAmount: (productsArr) => {
     let totalAmount = 0
 
-    priceArr.forEach((element, index) => {
-      totalAmount += (element.price * productsArr[index].quantity);
+    productsArr.forEach((element) => {
+      totalAmount += (element.price * element.quantity);
       console.log(totalAmount);
     })
 
@@ -67,14 +76,15 @@ const orderControl = {
     try {
       const order = await Order.findAll({
         where: { user_id: id },
-        attributes: [['id', 'order_id'], 'status', 'total_amount', 'payment'],
+        attributes: [['id', 'order_id'], 'description', 'status', 'total_amount', 'payment'],
         include: [
           {
             model: Product,
             as: 'products',
-            attributes: ['id', 'name', 'price', 'description'],
+            attributes: ['id', 'description', 'name', 'price'],
+            paranoid: false,
             through: {
-              as: 'item',
+              as: 'data',
               attributes: ['quantity']
             }
           }
@@ -124,10 +134,17 @@ const orderControl = {
   updateStock: async (objectProduct) => {
     try {
       objectProduct.forEach(async element => {
-        const object = await Product.decrement(['stock'], { by: element.quantity, where: { id: element.id } })
-        console.log(object);
+        await Product.decrement(['stock'], { by: element.quantity, where: { id: element.id } })
       })
     } catch (err) { return err }
+  },
+  newDescription: (productsArr) => {
+    let description = '';
+    productsArr.forEach(element => {
+      description += `${element.quantity}x${element.name}, `;
+    })
+    description = description.slice(0, -2)
+    return description;
   }
 }
 

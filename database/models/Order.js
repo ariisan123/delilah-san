@@ -5,6 +5,9 @@ module.exports = (sequelize, type) => sequelize.define('Order', {
     autoIncrement: true,
     allowNull: false
   },
+  description: {
+    type: type.TEXT,
+  },
   status: {
     type: type.ENUM,
     values: ['pending', 'processed', 'shipped', 'delivered'],
