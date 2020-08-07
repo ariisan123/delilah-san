@@ -1,4 +1,5 @@
 const { Order, Product } = require('../database/db');
+const { Op } = require('sequelize');
 
 const orderControl = {
   new: async (orderObject) => {
@@ -17,10 +18,17 @@ const orderControl = {
       });
     } catch (err) { return err }
   },
-  getProduct: async (productId) => {
+  getProduct: async (objectProduct) => {
     try {
       const product = await Product.findOne({
-        where: { id: productId },
+        where: {
+          id: objectProduct.id,
+          stock: {
+            [Op.and]: {
+              [Op.gte]: objectProduct.quantity
+            }
+          }
+        },
         attributes: ['price']
       })
       if (!product) {
@@ -33,9 +41,8 @@ const orderControl = {
   verifyProducts: async (productsArr) => {
     try {
       let finalProducts = [];
-
       for (let i = 0; i < productsArr.length; i++) {
-        const exist = await orderControl.getProduct(productsArr[i].id);
+        const exist = await orderControl.getProduct(productsArr[i]);
         if (exist) {
           finalProducts.push({ id: productsArr[i].id, price: exist.dataValues.price });
         } else {
@@ -90,15 +97,36 @@ const orderControl = {
       const order = await Order.findOne({
         where: {
           id: id
-        }
+        },
+        attributes: [['id', 'order_id'], 'status', 'total_amount', 'payment'],
+        include: [
+          {
+            model: Product,
+            as: 'products',
+            attributes: ['id', 'name', 'price', 'description'],
+            through: {
+              as: 'item',
+              attributes: ['quantity']
+            }
+          }
+        ]
       })
 
       if (order) {
+        console.log(order);
         return order
       } else {
         return false
       }
 
+    } catch (err) { return err }
+  },
+  updateStock: async (objectProduct) => {
+    try {
+      objectProduct.forEach(async element => {
+        const object = await Product.decrement(['stock'], { by: element.quantity, where: { id: element.id } })
+        console.log(object);
+      })
     } catch (err) { return err }
   }
 }

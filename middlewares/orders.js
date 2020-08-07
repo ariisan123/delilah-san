@@ -19,21 +19,17 @@ const post = {
     next()
   },
   productsExist: async (req, res, next) => {
-
     try {
-
       const { products } = req.body;
       const finalProducts = await orderControl.verifyProducts(products);
-      console.log(finalProducts);
 
       if (finalProducts.length == products.length) {
         const totalAmount = orderControl.getTotalAmount(finalProducts, products);
         res.locals.totalAmount = totalAmount;
         next()
       } else {
-        res.status(404).send('Producto/s no encontado/s')
+        res.status(404).send('Producto no encontrado o sin stock')
       }
-
     } catch (err) {
       res.status(500).json(err)
     }
@@ -47,7 +43,7 @@ const post = {
     try {
       const order = await orderControl.new(orderObject);
       await orderControl.newItems(order, orderObject.products)
-
+      await orderControl.updateStock(orderObject.products)
       res.status(201).send('Orden creada exitosamente!')
     } catch (err) {
       res.status(500).json(err)
@@ -106,9 +102,7 @@ const put = {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      console.log(status)
       await orderControl.updateStatus(id, status)
-
       res.status(200).send('Estado actualizado correctamente')
     } catch (err) {
       res.status(500).json(err)

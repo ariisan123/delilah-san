@@ -4,8 +4,7 @@ const signup = {
   bodyIsOk: (req, res, next) => {
     const newUser = Object.keys(req.body);
     let userKeys = userControl.getAttributes(1, 8);
-
-    if (newUser.toString() == userKeys.toString()) {
+    if (newUser.toString() == userKeys.toString() || newUser.toString() == (userKeys.toString() + ',admin')) {
       next()
     } else {
       res.status(400).send('Los parametros enviados no coinciden con los necesarios.')

@@ -2,27 +2,22 @@ const jwt = require('jsonwebtoken');
 require('../dotenv');
 
 const isAdmin = async (req, res, next) => {
-  const { token } = req.headers;
-
   try {
-    const user = jwt.verify(token, process.env.SECRET);
+    const { user } = res.locals;
     if (user.admin) {
       next()
     } else {
       res.status(401).send('No autorizado')
     }
   } catch (err) {
-    if (err.name == 'JsonWebTokenError') {
-      res.status(400).send('Error, token invalido')
-    } else {
-      res.status(500).json(err)
-    }
+    res.status(500).json(err)
   }
 }
 
 const isLogged = (req, res, next) => {
   try {
-    const { token } = req.headers;
+    const token = req.headers.authorization.split(" ")[1];
+    console.log(token);
     const user = jwt.verify(token, process.env.SECRET);
     if (user.user_id) {
       res.locals.user = user

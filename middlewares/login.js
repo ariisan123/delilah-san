@@ -23,7 +23,7 @@ const login = {
         res.locals.user = exist;
         next()
       } else {
-        res.status(400).send('Usuario inexistente')
+        res.status(404).send('Usuario no encontrado.')
       }
 
     } catch (err) {
@@ -39,9 +39,9 @@ const login = {
       const passOk = await userControl.comparePass(req.body.password, user.password);
       if (passOk) {
         const token = userControl.setJwt(user.id, user.admin)
-        res.status(200).json(token)
+        res.status(200).json({ token: token })
       } else {
-        res.status(400).send('Contraseña incorrecta')
+        res.status(401).send('Contraseña incorrecta')
       }
 
     } catch (err) {

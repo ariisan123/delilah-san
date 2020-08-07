@@ -7,7 +7,7 @@ router.route('/')
   .get(isLogged, get.all)
 
 router.route('/:id')
-  .put(isAdmin, put.verifyStatus, put.orderExist, put.update)
+  .put(isLogged, isAdmin, put.verifyStatus, put.orderExist, put.update)
 
 
 module.exports = router;
