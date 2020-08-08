@@ -86,9 +86,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
-<<<<<<< HEAD
-=======
 
 # VSCODE
 .vscode
->>>>>>> develop
