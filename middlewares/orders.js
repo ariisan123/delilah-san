@@ -115,4 +115,32 @@ const put = {
   }
 }
 
-module.exports = { post, get, put } 
+const deleteOrder = {
+  exist: async (req, res, next) => {
+    try {
+      const orderId = req.params.id;
+      const orderExist = await orderControl.getOne(orderId);
+      console.log(orderExist)
+      if (orderExist) {
+        next()
+      } else {
+        res.status(404).send("No se encontro el pedido")
+      }
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  },
+  delete: async (req, res) => {
+    try {
+      const orderId = req.params.id;
+      const response = await orderControl.delete(orderId);
+      if (response) {
+        res.status(200).send("Pedido eliminado")
+      }
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+}
+
+module.exports = { post, get, put, deleteOrder } 

@@ -121,6 +121,7 @@ const orderControl = {
           }
         ]
       })
+      console.log(order);
 
       if (order) {
         console.log(order);
@@ -145,6 +146,18 @@ const orderControl = {
     })
     description = description.slice(0, -2)
     return description;
+  },
+  delete: async (orderId) => {
+    try {
+      const response = await Order.destroy({
+        where: {
+          id: orderId
+        }
+      });
+
+      console.log(response)
+      return response;
+    } catch (err) { return err }
   }
 }
 
